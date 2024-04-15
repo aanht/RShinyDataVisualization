@@ -13,15 +13,17 @@ function(input, output, session) {
   #Babynames over the years
   output$linePlot <- renderPlot({
     #Getting inputs
-    selected1stYear <- input$selectFirstYear
-    selected2ndYear <- input$selectSecondYear
+    "selected1stYear <- input$selectFirstYear
+    selected2ndYear <- input$selectSecondYear"
+    selectedRange <- input$yearRange
     selectedNames <- input$selectName
     selectedSex <- input$selectSex
 
     #Filtering data & graph line plot
-    filtered <- filter(babynames, name %in% selectedNames, year >= selected1stYear & year <= selected2ndYear, sex == selectedSex)
+    filtered <- filter(babynames, name %in% selectedNames, year >= selectedRange[1] & year <= selectedRange[2], sex == selectedSex)
     ggplot(filtered, aes(year, prop, color = name)) + 
       geom_line() + 
+      labs(y = "proportion") +
       scale_color_manual(values = c('goldenrod1', 'palegreen4', 'steelblue', 'indianred2')) + 
       theme_bw() + 
       theme(panel.grid.major = element_line(color = "grey", linetype = "dotted"), 

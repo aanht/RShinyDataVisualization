@@ -21,22 +21,18 @@ fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-            sliderInput(
-              "selectFirstYear", "Choose First Year:",
-              min = 1880,
-              max = 2017,
-              step = 10,
-              value = 2017),
-            sliderInput(
-              "selectSecondYear", "Choose Second Year:",
-              min = 1880,
-              max = 2017,
-              step = 10,
-              value = 2017),
+            sliderInput("yearRange", "Choose a range of years:", min = 1880, 
+                        max = 2017, value = c(1880, 2017)),
+    
             selectizeInput(
               "selectName", "Choose 4 names:", 
               choices = unique(babynames$name[startsWith(babynames$name, "A")][1:10]), 
-              options = list(maxItems = 4))
+              options = list(maxItems = 4)), 
+            
+            selectizeInput(
+              "selectSex", "Male or Female:", 
+              choices = unique(babynames$sex))
+            
         ),
         # Show a plot of the generated distribution
         mainPanel(
