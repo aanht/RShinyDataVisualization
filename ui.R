@@ -35,7 +35,7 @@ fluidPage(
               value = 2017),
             selectizeInput(
               "selectName", "Choose 4 names:", 
-              choices = unique(babynames$name[startsWith(babynames$name, "T")][1:10]), 
+              choices = unique(babynames$name[startsWith(babynames$name, "A")][1:10]), 
               options = list(maxItems = 4))
         ),
         # Show a plot of the generated distribution
