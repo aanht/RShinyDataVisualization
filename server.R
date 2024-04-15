@@ -60,6 +60,31 @@ function(input, output, session) {
       summarise(count = n())
     
     aggregated_data
-    ggplot(aggregated_data, aes(x= LocationDesc, y= count, fill = Education)) + geom_col(position = "dodge")
+    ggplot(aggregated_data, aes(x= LocationDesc, y= count, fill = Education)) + 
+      geom_col(position = "dodge") + 
+      labs(x = "states") +
+      theme_bw() + 
+      theme(panel.grid.major = element_line(color = "grey", linetype = "dotted"), 
+            panel.grid.minor = element_blank(), 
+            axis.line.x = element_line(color="black"), 
+            axis.line.y = element_line(color="black"))
+  })
+  
+  output$mapPlot <- renderPlot({
+    mapYear <- input$mapYear
+    mapStatus <- input$mapStatus
+    
+    usa <- ne_states(country = "United States of America", returnclass = "sf")
+    map <- ggplot(data = usa) + geom_sf(fill = "gray95") + coord_sf(xlim = c(-100, -40), ylim = c(10, 52)) + theme_minimal() 
+    
+    filtered <- filter(storms, status == mapStatus, year == mapYear)
+    active <- group_by(filtered, name) %>%
+      summarise(active = n()) %>%
+      arrange(desc(active))
+    activeStorms <- head(active, 1)
+    activeStormNames <- filter(storms, name %in% pull(activeStorms, name))
+    
+    map + geom_tile(data = activeStormNames, aes(x = long, y = lat, color = name, fill = wind), width = 1.4, height = 1.4, alpha = 0.8, linetype = "blank") +
+      scale_fill_gradient(low = "lightblue", high = "red", name = "Wind Speed") 
   })
 }

@@ -1,0 +1,93 @@
+---
+title: "charts"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+install.packages("tidyverse")
+install.packages("babynames")
+library(babynames)
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+tobaccoData <- read_csv("Youth_Tobacco_Survey__YTS__Data.csv")
+
+
+```
+
+```{r}
+babynames
+```
+
+n: *count of names per year*
+
+prop: *proportion* of people born per year with that name; *total number of people given that name in a given year, divided by the total number of births*
+
+see the popular names throughout the decades (input widget: slider (every 10 years)
+
+```{r}
+filter(babynames, name %in% c('John', 'George', 'Paul'), sex == "M") %>% ggplot(aes(year, prop, color = name)) + geom_line() 
+
+```
+
+```{r}
+babynames %>% 
+  filter(name %in% c("George")) %>% 
+  #filter(sex %in% "F") %>% 
+  ggplot(aes(year, prop, color = name)) + geom_line()
+```
+
+```{r}
+usa <- ne_states(country = "United States of America", returnclass = "sf")
+ggplot(data = usa) + geom_sf() + coord_sf(xlim = c(-127, -68), ylim = c(20, 52)) + theme_minimal() + geom_point()
+```
+
+```{r}
+head(tobaccoData)
+```
+
+```{r}
+filter(tobaccoData, TopicDesc == "Smokeless Tobacco Use (Youth)", Response == "Ever", LocationDesc %in% c("California", "Ohio", "Alabama")) %>% select("LocationDesc", "Education", "Response", "TopicDesc")
+```
+
+```{r}
+
+filtered <- filter(tobaccoData, TopicDesc == "Cigarette Use (Youth)" & Response == "Frequent" & LocationDesc %in% c("Ohio"), Education == "Middle School")
+aggregated_data <- 
+  group_by(filtered, Education) %>%
+  summarise(count = n()) %>% arrange(desc(count))
+select(filtered, "LocationDesc", "Education", "Response", "TopicDesc")
+aggregated_data
+#ggplot(filtered, aes(x= LocationDesc, fill = Education)) + geom_bar(position = "dodge")
+```
+
+```{r}
+storms
+```
+
+```{r}
+usa <- ne_states(country = "United States of America", returnclass = "sf")
+map <- ggplot(data = usa) + geom_sf() + coord_sf(xlim = c(-100, -40), ylim = c(10, 52)) + theme_minimal() 
+filtered <- filter(storms, status == "tropical storm", year == "2005")
+active <- group_by(filtered, name) %>%
+  summarise(active = n()) %>%
+    arrange(desc(active))
+activeStorms <- head(active, 1)
+activeStormNames <- filter(storms, name %in% pull(activeStorms, name))
+
+activeStormNames
+
+map +
+  geom_tile(data = activeStormNames, aes(x = long, y = lat, color = name, fill = wind), width = 1.4, height = 1.4, alpha = 0.8, linetype = "blank") +
+  scale_fill_gradient(low = "lightblue", high = "red", name = "Wind Speed") 
+  theme(legend.position = "none")
+```
