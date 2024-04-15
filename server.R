@@ -7,14 +7,17 @@
 #    https://shiny.posit.co/
 #
 
+install.packages("babynames")
 library(babynames)
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+tobaccoData <- read_csv("Youth_Tobacco_Survey__YTS__Data.csv")
 
 function(input, output, session) {
-  #Babynames over the years
+  #Baby names over the years
   output$linePlot <- renderPlot({
     #Getting inputs
-    "selected1stYear <- input$selectFirstYear
-    selected2ndYear <- input$selectSecondYear"
     selectedRange <- input$yearRange
     selectedNames <- input$selectName
     selectedSex <- input$selectSex
@@ -30,5 +33,33 @@ function(input, output, session) {
             panel.grid.minor = element_blank(), 
             axis.line.x = element_line(color="black"), 
             axis.line.y = element_line(color="black"))
+  })
+  
+  output$barPlot <- renderPlot({
+    selectedType <- input$buttonsTypeUse
+    selectedHabits <- input$selectHabit
+    selectedStates <- input$selectStates
+    
+    if (selectedType == 1) {
+      selectedType <- "Cigarette Use (Youth)"
+    } else {
+      selectedType <- "Smokeless Tobacco Use (Youth)"
+    }
+    
+    if (selectedHabits == 1) {
+      selectedHabits <- "Ever"
+    } else if (selectedHabits == 1) {
+      selectedHabits <- "Frequent"
+    } else {
+      selectedHabits <- "Current"
+    }
+    
+    filtered <- filter(tobaccoData, TopicDesc == selectedType & Response == selectedHabits & LocationDesc %in% selectedStates)
+    aggregated_data <- filtered %>%
+      group_by(LocationDesc, Education) %>%
+      summarise(count = n())
+    
+    aggregated_data
+    ggplot(aggregated_data, aes(x= LocationDesc, y= count, fill = Education)) + geom_col(position = "dodge")
   })
 }
